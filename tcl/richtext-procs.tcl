@@ -37,11 +37,18 @@ namespace eval ::richtext-ckeditor4 {
         set ckOptionsList {}
         
         if {![dict exists $options spellcheck]} {
-            dict set options spellcheck true
+            dict set options spellcheck [parameter::get \
+                                             -package_id [apm_package_id_from_key "richtext-ckeditor4"] \
+                                             -parameter "SCAYT" \
+                                             -default "false"]
         }
 
+        # For the native spellchecker, one has to hold "ctrl" or "cmd"
+        # with the right click.
+        
         lappend ckOptionsList \
             "language: '[lang::conn::language]'" \
+            "disableNativeSpellChecker: false" \
             "scayt_autoStartup: [dict get $options spellcheck]"
 
         if {[dict exists options plugins]} {
