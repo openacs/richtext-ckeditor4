@@ -12,7 +12,7 @@ ad_library {
     @cvs-id $Id$
 }
 
-namespace eval ::richtext-ckeditor4 {
+namespace eval ::richtext::ckeditor4 {
     
     ad_proc initialize_widget {
         -form_id
