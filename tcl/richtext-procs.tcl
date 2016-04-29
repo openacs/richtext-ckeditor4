@@ -69,7 +69,7 @@ namespace eval ::richtext::ckeditor4 {
             CKEDITOR.replace( '$text_id', {$ckOptions} );
         }]
 
-        template::head::add_javascript -src "//cdn.ckeditor.com/4.5.6/standard/ckeditor.js"
+        template::head::add_javascript -src "//cdn.ckeditor.com/4.5.7/standard/ckeditor.js"
 
         #
         # do we need render_widgets?
