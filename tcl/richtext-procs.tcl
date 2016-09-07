@@ -69,8 +69,17 @@ namespace eval ::richtext::ckeditor4 {
             CKEDITOR.replace( '$text_id', {$ckOptions} );
         }]
 
-        template::head::add_javascript -src "//cdn.ckeditor.com/4.5.9/standard/ckeditor.js"
+        template::head::add_javascript -src "//cdn.ckeditor.com/4.5.10/standard/ckeditor.js"
 
+        #
+        # add required directives for content security policies
+        #
+        security::csp::require script-src 'unsafe-eval'
+        security::csp::require script-src 'unsafe-inline'
+        security::csp::require script-src cdn.ckeditor.com
+        security::csp::require style-src cdn.ckeditor.com
+        security::csp::require img-src cdn.ckeditor.com
+        
         #
         # do we need render_widgets?
         #
