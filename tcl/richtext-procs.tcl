@@ -75,7 +75,7 @@ namespace eval ::richtext::ckeditor4 {
         # add required directives for content security policies
         #
         security::csp::require script-src 'unsafe-eval'
-        security::csp::require script-src 'unsafe-inline'
+        security::csp::require -force script-src 'unsafe-inline'
         security::csp::require script-src cdn.ckeditor.com
         security::csp::require style-src cdn.ckeditor.com
         security::csp::require img-src cdn.ckeditor.com
