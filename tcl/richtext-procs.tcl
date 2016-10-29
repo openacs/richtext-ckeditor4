@@ -25,6 +25,12 @@ namespace eval ::richtext::ckeditor4 {
     } {
         ns_log debug "initialize CKEditor instance with <$options>"
 
+        # allow per default all classes, unless the user has specified
+        # it differently
+        if {![dict exists $options extraAllowedContent]} {
+            dict set options extraAllowedContent {*(*)}
+        }
+        
         # The richtext widget might be specified by "options {editor
         # ckeditor4}" or via the package parameter "RichTextEditor" of
         # acs-templating.
@@ -60,6 +66,10 @@ namespace eval ::richtext::ckeditor4 {
         if {[dict exists options customConfig]} {
             lappend ckOptionsList "customConfig: '[dict get $options customConfig]'"
         }
+        if {[dict exists options extraAllowedContent]} {
+            lappend ckOptionsList "extraAllowedContent: '[dict get $options extraAllowedContent]'"
+        }
+
         set ckOptions [join $ckOptionsList ", "]
         
         #
@@ -69,7 +79,7 @@ namespace eval ::richtext::ckeditor4 {
             CKEDITOR.replace( '$text_id', {$ckOptions} );
         }]
 
-        template::head::add_javascript -src "//cdn.ckeditor.com/4.5.10/standard/ckeditor.js"
+        template::head::add_javascript -src "//cdn.ckeditor.com/4.5.11/standard/ckeditor.js"
 
         #
         # add required directives for content security policies
