@@ -57,16 +57,16 @@ namespace eval ::richtext::ckeditor4 {
             "disableNativeSpellChecker: false" \
             "scayt_autoStartup: [dict get $options spellcheck]"
 
-        if {[dict exists options plugins]} {
+        if {[dict exists $options plugins]} {
             lappend ckOptionsList "extraPlugins: '[dict get $options plugins]'"
         }
-        if {[dict exists options skin]} {
+        if {[dict exists $options skin]} {
             lappend ckOptionsList "skin: '[dict get $options skin]'"
         }
-        if {[dict exists options customConfig]} {
+        if {[dict exists $options customConfig]} {
             lappend ckOptionsList "customConfig: '[dict get $options customConfig]'"
         }
-        if {[dict exists options extraAllowedContent]} {
+        if {[dict exists $options extraAllowedContent]} {
             lappend ckOptionsList "extraAllowedContent: '[dict get $options extraAllowedContent]'"
         }
 
