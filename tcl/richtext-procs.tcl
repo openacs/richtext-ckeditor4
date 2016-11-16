@@ -191,7 +191,7 @@ namespace eval ::richtext::ckeditor4 {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
 
-        set download_url http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${package}.zip
+        set download_url http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${cp_package}.zip
         set resources $::acs::rootdir/packages/richtext-ckeditor4/www/resources
 
         #
@@ -224,7 +224,7 @@ namespace eval ::richtext::ckeditor4 {
             #
             set fn [dict get $result file]
             set output [exec $unzip -o $fn -d $resources/$version]
-            file rename $resources/$version/ckeditor $resources/$version/$package
+            file rename $resources/$version/ckeditor $resources/$version/$ck_package
         } else {
             error "download of $download_url failed, HTTP status: [dict get $result status]"
         }
