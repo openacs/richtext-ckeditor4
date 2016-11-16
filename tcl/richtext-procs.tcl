@@ -13,6 +13,9 @@ ad_library {
 }
 
 namespace eval ::richtext::ckeditor4 {
+
+    set version 4.5.11
+    set ck_package standard
     
     ad_proc initialize_widget {
         -form_id
@@ -79,16 +82,10 @@ namespace eval ::richtext::ckeditor4 {
             CKEDITOR.replace( '$text_id', {$ckOptions} );
         }]
 
-        template::head::add_javascript -src "//cdn.ckeditor.com/4.5.11/standard/ckeditor.js"
-
         #
-        # add required directives for content security policies
+        # Load the editor and everything necessary to the current page.
         #
-        security::csp::require script-src 'unsafe-eval'
-        security::csp::require -force script-src 'unsafe-inline'
-        security::csp::require script-src cdn.ckeditor.com
-        security::csp::require style-src cdn.ckeditor.com
-        security::csp::require img-src cdn.ckeditor.com
+        ::richtext::ckeditor4::add_editor
         
         #
         # do we need render_widgets?
@@ -119,6 +116,118 @@ namespace eval ::richtext::ckeditor4 {
         # loading the same resource multiple times, we can perform the
         # load in the per-widget initialization and we are done here.
         #
+    }
+
+    
+    ad_proc ::richtext::ckeditor4::add_editor {
+        {-ck_package ""}
+        {-version ""}
+    } {
+
+        Add the necessary JavaScript and other files to the current
+        page. The naming is modeled after "add_script", "add_css",
+        ... but is intended to care about everything necessary,
+        including the content security policies. Similar naming
+        conventions should be used for other editors as well.
+
+        This function can be as well used from other packages, such
+        e.g. from the xowiki form-fields, which provide a much higher
+        customization.
+        
+    } {
+        #
+        # If no version or ck editor package are specified, use the
+        # namespaced variables as default.
+        #
+        if {$version eq ""} {
+            set version ${::richtext::ckeditor4::version}
+        }
+        if {$ck_package eq ""} {
+            set ck_package ${::richtext::ckeditor4::ck_package}
+        }
+
+        set suffix $version/$ck_package/ckeditor.js
+        set resources $::acs::rootdir/packages/richtext-ckeditor4/www/resources
+        
+        if {[file exists $resources/$suffix]} {
+            template::head::add_javascript -src "/resources/richtext-ckeditor4/$suffix"
+        } else {
+            template::head::add_javascript -src "//cdn.ckeditor.com/$suffix"
+            security::csp::require script-src cdn.ckeditor.com
+            security::csp::require style-src cdn.ckeditor.com
+            security::csp::require img-src cdn.ckeditor.com
+        }
+
+        #
+        # add required general directives for content security policies
+        #
+        security::csp::require script-src 'unsafe-eval'
+        security::csp::require -force script-src 'unsafe-inline'
+    }
+    
+    ad_proc ::richtext::ckeditor4::download {
+        {-ck_package ""}
+        {-version ""}
+    } {
+        
+        Download the CKeditor package in the specified version and put
+        it into a directory structure similar to the CDN structure to
+        allow installation of multiple versions. When the local
+        structure is available, it will be used by initialize_widget.
+
+        Notice, that for this automated download, the "unzip" program
+        must be installed and $::acs::rootdir/packages/www must be
+        writable by the web server.
+        
+    } {
+        #
+        # If no version or ck editor package are specified, use the
+        # namespaced variables as default.
+        #
+        if {$version eq ""} {
+            set version ${::richtext::ckeditor4::version}
+        }
+        if {$ck_package eq ""} {
+            set ck_package ${::richtext::ckeditor4::ck_package}
+        }
+
+        set download_url http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${package}.zip
+        set resources $::acs::rootdir/packages/richtext-ckeditor4/www/resources
+
+        #
+        # Do we have unzip installed?
+        #
+        set unzip [::util::which unzip]
+        if {$unzip eq ""} {
+            error "can't install CKeditor locally; no unzip program found on PATH" 
+        }
+        
+        #
+        # Do we have a writable output directory under resources?
+        #
+        if {![file isdirectory $resources/$version]} {
+            file mkdir $resources/$version
+        }
+        if {![file writable $resources/$version]} {
+            error "directory $resources/$version is not writable"
+        }
+
+        #
+        # So far, everything is fine, download the editor package
+        #
+        set result [util::http::get -url $download_url -spool]
+        #ns_log notice "GOT $result"
+        if {[dict get $result status] == 200} {
+            #
+            # The Download was successful, unzip it and let the
+            # directory structure look similar as on the CDN.
+            #
+            set fn [dict get $result file]
+            set output [exec $unzip -o $fn -d $resources/$version]
+            file rename $resources/$version/ckeditor $resources/$version/$package
+        } else {
+            error "download of $download_url failed, HTTP status: [dict get $result status]"
+        }
     }
 
 }
