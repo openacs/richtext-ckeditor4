@@ -14,7 +14,7 @@ ad_library {
 
 namespace eval ::richtext::ckeditor4 {
 
-    set version 4.5.11
+    set version 4.6.1
     set ck_package standard
     
     ad_proc initialize_widget {
@@ -118,21 +118,13 @@ namespace eval ::richtext::ckeditor4 {
         #
     }
 
-    
-    ad_proc ::richtext::ckeditor4::add_editor {
+    ad_proc ::richtext::ckeditor4::version_info {
         {-ck_package ""}
         {-version ""}
     } {
 
-        Add the necessary JavaScript and other files to the current
-        page. The naming is modeled after "add_script", "add_css",
-        ... but is intended to care about everything necessary,
-        including the content security policies. Similar naming
-        conventions should be used for other editors as well.
-
-        This function can be as well used from other packages, such
-        e.g. from the xowiki form-fields, which provide a much higher
-        customization.
+        Get information about available version(s) of CKEditor, either
+        from the local file system, or from CDN.
         
     } {
         #
@@ -150,9 +142,38 @@ namespace eval ::richtext::ckeditor4 {
         set resources $::acs::rootdir/packages/richtext-ckeditor4/www/resources
         
         if {[file exists $resources/$suffix]} {
-            template::head::add_javascript -src "/resources/richtext-ckeditor4/$suffix"
+            lappend result file $resources/$suffix
+            lappend result resources /resources/richtext-ckeditor4/$suffix
+        }
+        lappend result cdn "//cdn.ckeditor.com/$suffix"
+
+        return $result
+    }
+    
+    ad_proc ::richtext::ckeditor4::add_editor {
+        {-ck_package ""}
+        {-version ""}
+    } {
+
+        Add the necessary JavaScript and other files to the current
+        page. The naming is modeled after "add_script", "add_css",
+        ... but is intended to care about everything necessary,
+        including the content security policies. Similar naming
+        conventions should be used for other editors as well.
+
+        This function can be as well used from other packages, such
+        e.g. from the xowiki form-fields, which provide a much higher
+        customization.
+        
+    } {
+        set version_info [::richtext::ckeditor4::version_info \
+                              -ck_package $ck_package \
+                              -version $version]
+
+        if {[dict exists $version_info resources]} {
+            template::head::add_javascript -src [dict get $version_info resources]
         } else {
-            template::head::add_javascript -src "//cdn.ckeditor.com/$suffix"
+            template::head::add_javascript -src [dict get $version_info cdn]
             security::csp::require script-src cdn.ckeditor.com
             security::csp::require style-src cdn.ckeditor.com
             security::csp::require img-src cdn.ckeditor.com
@@ -191,7 +212,7 @@ namespace eval ::richtext::ckeditor4 {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
 
-        set download_url http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${cp_package}.zip
+        set download_url http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${ck_package}.zip
         set resources $::acs::rootdir/packages/richtext-ckeditor4/www/resources
 
         #
