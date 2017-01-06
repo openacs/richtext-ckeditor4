@@ -13,7 +13,7 @@ under <strong>@resources@</strong></if>
   version @version@ of CKEditor to your file system?</p>
   </if>
   <else>
-  <p>The directory <strong>@path@</strong> is @writable@ writable. In
+  <p>The directory <strong>@path@</strong> is NOT writable for the server. In
   order to be able to download the CKEditor via this web interface,
   please change the permissions so that OpenACS can write to it.</p>
   </else>
