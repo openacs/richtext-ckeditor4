@@ -14,7 +14,7 @@ ad_library {
 
 namespace eval ::richtext::ckeditor4 {
 
-    set version 4.6.1
+    set version 4.6.2
     set ck_package standard
     
     ad_proc initialize_widget {
