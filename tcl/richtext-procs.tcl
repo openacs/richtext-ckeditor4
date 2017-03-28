@@ -245,7 +245,7 @@ namespace eval ::richtext::ckeditor4 {
             #
             set fn [dict get $result file]
             set output [exec $unzip -o $fn -d $resources/$version]
-            file rename $resources/$version/ckeditor $resources/$version/$ck_package
+            file rename -- $resources/$version/ckeditor $resources/$version/$ck_package
         } else {
             error "download of $download_url failed, HTTP status: [dict get $result status]"
         }
