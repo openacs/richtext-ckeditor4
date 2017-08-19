@@ -86,8 +86,13 @@ namespace eval ::richtext::ckeditor4 {
         # For the native spellchecker, one has to hold "ctrl" or "cmd"
         # with the right click.
 
+        lappend ckOptionsList \
+            "language: '[lang::conn::language]'" \
+            "disableNativeSpellChecker: false" \
+            "scayt_autoStartup: [dict get $options spellcheck]" 
+
         #
-        # Get the property "displayed_object_id" from the call stack
+        # Get the property "displayed_object_id" from the call-stack
         #
         for {set l 0} {$l < [info level]} {incr l} {
             set propVar __adp_properties(displayed_object_id)
@@ -96,28 +101,31 @@ namespace eval ::richtext::ckeditor4 {
                 break
             }
         }
-        set image_upload_url [export_vars \
-                                  -base $::richtext::ckeditor4::ckfinder_url/uploadimage {
-                                      {object_id $displayed_object_id} {type Images}
-                                  }]
-        set file_upload_url [export_vars \
-                                 -base $::richtext::ckeditor4::ckfinder_url/upload {
-                                     {object_id $displayed_object_id} {type Files} {command QuickUpload}
-                                 }]
-        set file_browse_url [export_vars \
-                                 -base $::richtext::ckeditor4::ckfinder_url/browse {
-                                     {object_id $displayed_object_id} {type Files}
-                                 }]
-        lappend ckOptionsList \
-            "language: '[lang::conn::language]'" \
-            "disableNativeSpellChecker: false" \
-            "scayt_autoStartup: [dict get $options spellcheck]" \
-            "imageUploadUrl: '$image_upload_url'" \
-            "filebrowserBrowseUrl: '$file_browse_url'" \
-            "filebrowserUploadUrl: '$file_upload_url'" \
-            "filebrowserWindowWidth: '800'" \
-            "filebrowserWindowHeight: '600'"
-
+        if {[info exists displayed_object_id]} {
+            #
+            # If we have a displayed_object_id, configure it for the
+            # plugins "filebrowser" and "uploadimage".
+            #
+            set image_upload_url [export_vars \
+                                      -base $::richtext::ckeditor4::ckfinder_url/uploadimage {
+                                          {object_id $displayed_object_id} {type Images}
+                                      }]
+            set file_upload_url [export_vars \
+                                     -base $::richtext::ckeditor4::ckfinder_url/upload {
+                                         {object_id $displayed_object_id} {type Files} {command QuickUpload}
+                                     }]
+            set file_browse_url [export_vars \
+                                     -base $::richtext::ckeditor4::ckfinder_url/browse {
+                                         {object_id $displayed_object_id} {type Files}
+                                     }]
+            lappend ckOptionsList \
+                "imageUploadUrl: '$image_upload_url'" \
+                "filebrowserBrowseUrl: '$file_browse_url'" \
+                "filebrowserUploadUrl: '$file_upload_url'" \
+                "filebrowserWindowWidth: '800'" \
+                "filebrowserWindowHeight: '600'"
+        }
+        
         set plugins [split $::richtext::ckeditor4::standard_plugins ,]
         if {[dict exists $options plugins]} {
             lappend plugins {*}[split [dict get $options plugins] ,]
