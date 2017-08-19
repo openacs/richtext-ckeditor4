@@ -31,81 +31,175 @@
 #
 
 #
-# Upload handler
+# We need here a small helper for input checking using the usual
+# checkers for two reasons:
 #
-ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/upload {
+#  1) The way ckfinder is recommended to work relies on the
+#     separate processing of QUERY and POST variables of an
+#     request. The traditional OpenACS input handling does NOT
+#     support both types of variables at the same time. so we use
+#     here a small helper, such we can use at least the
+#     traditional calling conventions and page contract filters.
+#
+#  2) The classical page_contract cannot be configured to interact
+#     properly with AJAX, at least not with a predefined AJAX
+#     interface expecting always a certain JSON array as result.
+#     This corresponds to "responseType=json" in the uploadUrl.
+#
+
+ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/uploadimage {
     #
-    # We need here a small helper for input checking using the usual
-    # checkers for two reasons:
-    #
-    #  1) The way ckfinder is recommended to work relies on the
-    #     separate processing of QUERY and POST variables of an
-    #     request. The traditional OpenACS input handling does NOT
-    #     support both types of variables at the same time. so we use
-    #     here a small helper, such we can use at least the
-    #     traditional calling conventions and page contract filters.
-    #
-    #  2) The classical page_contract cannot be configured to interact
-    #     properly with AJAX, at least not with a predefined AJAX
-    #     interface expecting always a certain JSON array as result.
+    # Image upload handler (for "uploadimage" plugin)
     #
     set complaints [::richtext::ckeditor4::ckfinder::query_page_contract {
-	{object_id:naturalnum}
-	{type:word}
+        {object_id:naturalnum}
+        {type:word}
     }]
 
     if {[llength $complaints] == 0 && $type eq "Images"} {
 
-	set form [ns_getform]
-	set d [::richtext::ckeditor4::ckfinder::image_attach \
-		   -object_id   $object_id \
-		   -import_file [ns_set get $form upload.tmpfile] \
-		   -mime_type   [ns_set get $form upload.content-type] \
-		   -user_id     [ad_conn user_id] \
-		   -peeraddr    [ad_conn peeraddr] \
-		   -package_id  [ad_conn package_id] \
-		  ]
-	set success [dict get $d success]
-	if {$success eq "1"} {
-	    #
-	    # Successful operation
-	    #
-	    set view_url [export_vars \
-			      -base $::richtext::ckeditor4::ckfinder_url/view {
-				  {image_id "[dict get $d image_id]"}
-			      }]
-	    set reply [subst {{
-		"uploaded":  [dict get $d success],
-		"fileName": "[dict get $d name]",
-		"url":      "$view_url",
-		"width":     [dict get $d width],
-		"height":    [dict get $d height]
-	    }}]
-	} else {
-	    #
-	    # ckfinder::image_attach returned an error
-	    #
-	    set errMsg [dict get $d errMsg]
-	}
+        set form [ns_getform]
+        set d [::richtext::ckeditor4::ckfinder::image_attach \
+                   -object_id   $object_id \
+                   -import_file [ns_set get $form upload.tmpfile] \
+                   -mime_type   [ns_set get $form upload.content-type] \
+                   -user_id     [ad_conn user_id] \
+                   -peeraddr    [ad_conn peeraddr] \
+                   -package_id  [ad_conn package_id] \
+                   -image \
+                  ]
+        set success [dict get $d success]
+        if {$success eq "1"} {
+            #
+            # Successful operation
+            #
+            set view_url [export_vars \
+                              -base $::richtext::ckeditor4::ckfinder_url/view {
+                                  {image_id "[dict get $d file_id]"}
+                              }]
+            set reply [subst {{
+                "uploaded":  [dict get $d success],
+                "fileName": "[dict get $d name]",
+                "url":      "$view_url",
+                "width":     [dict get $d width],
+                "height":    [dict get $d height]
+            }}]
+        } else {
+            #
+            # ckfinder::image_attach returned an error
+            #
+            set errMsg [dict get $d errMsg]
+        }
     } else {
-	#
-	# Either page contract failed or invalid value for 'type' was
-	# specified
-	#
-	set errMsg "invalid query parameter for 'type' // $complaints"
+        #
+        # Either page contract failed or invalid value for 'type' was
+        # specified
+        #
+        dict set d errMsg "invalid query parameter // $complaints"
+        set success 0
     }
 
     if {$success eq "0"} {
-	set reply [subst {{
-	    "uploaded":  [dict get $d success],
-	    "error": {
-		"message": "[dict get $d errMsg]",
-	    }
-	}}]
+        set reply [subst {{
+            "uploaded":  $success,
+            "error": {
+                "message": "[dict get $d errMsg]",
+            }
+        }}]
     }
     ns_log notice $reply
 
     ns_return 200 text/plain $reply
+}
+
+
+ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/upload {
+    #
+    # Upload handler (for the standard "filebrowser" plugin)
+    #
+    set complaints [::richtext::ckeditor4::ckfinder::query_page_contract {
+        {object_id:naturalnum}
+        {type:word}
+        {CKEditorFuncNum ""}
+        {command:word ""}
+        {CKEditor:word ""}
+        {langCode en}
+    }]
+
+    if {[llength $complaints] == 0 && $type eq "Files"} {
+
+        set form [ns_getform]
+        set d [::richtext::ckeditor4::ckfinder::file_attach \
+                   -object_id   $object_id \
+                   -import_file [ns_set get $form upload.tmpfile] \
+                   -mime_type   [ns_set get $form upload.content-type] \
+                   -user_id     [ad_conn user_id] \
+                   -peeraddr    [ad_conn peeraddr] \
+                   -package_id  [ad_conn package_id] \
+                  ]
+        set success [dict get $d success]
+        if {$success eq "1"} {
+            #
+            # Successful operation
+            #
+            set view_url [export_vars \
+                              -base $::richtext::ckeditor4::ckfinder_url/view {
+                                  {image_id "[dict get $d file_id]"}
+                              }]
+            set reply [subst {
+                <script type="text/javascript">
+                window.parent.CKEDITOR.tools.callFunction("$CKEditorFuncNum", "$view_url", "");
+                </script>
+            }]
+        } else {
+            #
+            # ckfinder::image_attach returned an error
+            #
+            set errMsg [dict get $d errMsg]
+        }
+    } else {
+        #
+        # Either page contract failed or invalid value for 'type' was
+        # specified
+        #
+        dict set d errMsg "invalid query parameter // $complaints"
+        set success 0
+    }
+
+    if {$success eq "0"} {
+        set reply [subst {[dict get $d errMsg]}]
+    }
+    ns_log notice $reply
+    ns_return 200 text/html $reply
+}
+
+ns_register_proc GET $::richtext::ckeditor4::ckfinder_url/browse {
+    #
+    # File-browser (for the standard "filebrowser" plugin)
+    #
+    set complaints [::richtext::ckeditor4::ckfinder::query_page_contract {
+        {object_id:naturalnum}
+        {type:word}
+        {CKEditorFuncNum ""}
+        {CKEditor:word ""}
+        {langCode en}
+    }]
+
+    permission::require_permission \
+        -party_id [ad_conn user_id] \
+        -object_id $object_id \
+        -privilege read
+
+    set reply [template::adp_include \
+                   /packages/richtext-ckeditor4/lib/file-browser [subst {
+                       object_id "$object_id"
+                       type "$type"
+                       CKEditorFuncNum "$CKEditorFuncNum"
+                       CKEditor "$CKEditor"
+                       langCode "$langCode"
+    }]]
+
+    ns_return 200 text/html $reply
 }
 
 #
@@ -113,24 +207,27 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/upload {
 #
 
 ns_register_proc GET $::richtext::ckeditor4::ckfinder_url/view {
+    #
+    # View function (for "filebrowser" and "uploadimage" plugins)
+    #
     set ::template::parse_level [info level]
     ad_try {
-	#
-	# Use the standard page_contract
-	#
-	ad_page_contract {
-	} {
-	    {image_id:naturalnum ""}
-	}
-	::richtext::ckeditor4::ckfinder::return_file \
-	    -revision_id $image_id \
-	    -user_id [ad_conn user_id]
+        #
+        # Use the standard page_contract
+        #
+        ad_page_contract {
+        } {
+            {image_id:naturalnum ""}
+        }
+        ::richtext::ckeditor4::ckfinder::return_file \
+            -revision_id $image_id \
+            -user_id [ad_conn user_id]
 
     } ad_script_abort val {
-	#
-	# The page contract has probably failed, no need to raise an
-	# exception.
-	#
+        #
+        # The page contract has probably failed, no need to raise an
+        # exception.
+        #
     }
 }
 

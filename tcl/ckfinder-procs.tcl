@@ -14,15 +14,15 @@ ad_library {
 
 namespace eval ::richtext::ckeditor4::ckfinder {
 
-    ad_proc -public image_attach {
+    ad_proc -public file_attach {
         -import_file
         -mime_type
         -object_id
         {-privilege read}
-        {-image_url /ckfinder/upload.tcl}
         -user_id
         -peeraddr
         -package_id
+        {-image:boolean}
     } {
 
         Insert the provided image file to the content repository as a
@@ -39,35 +39,39 @@ namespace eval ::richtext::ckeditor4::ckfinder {
             -party_id $user_id \
             -object_id $object_id \
             -privilege $privilege
-        ns_log notice "CAN UPLOAD <$object_id>"
 
-        #
-        # Check if we can handle the mime type. Currently, only the
-        # following four mime types are supported, since these are
-        # supported by "ns_imgsize", which is used to determine the
-        # dimensions of the image.
-        #
-        switch -- $mime_type {
-            image/jpg -
-            image/jpeg -
-            image/gif -
-            image/png {
-                set ext .[lindex [split $mime_type /] 1]
-                lassign [ns_imgsize $import_file] width height
-                set success 1
+        if {$image_p} {
+            #
+            # Check if we can handle the mime type. Currently, only the
+            # following four mime types are supported, since these are
+            # supported by "ns_imgsize", which is used to determine the
+            # dimensions of the image.
+            #
+            switch -- $mime_type {
+                image/jpg -
+                image/jpeg -
+                image/gif -
+                image/png {
+                    set ext .[lindex [split $mime_type /] 1]
+                    lassign [ns_imgsize $import_file] width height
+                    set success 1
+                }
+                default {
+                    ns_log warning "image_attach: can't handle image type '$mime_type'"
+                    return [list \
+                                success 0 \
+                                errMsg "can't handle image type '$mime_type'"]
+                }
             }
-            default {
-                ns_log warning "image_attach: can't handle image type '$mime_type'"
-                return [list \
-                            success 0 \
-                            errMsg "can't handle image type '$mime_type'"]
-            }
+        } else {
+            set width 0
+            set height 0
+            set success 1
         }
-
         #
         # Create a new item without child_rels
         #
-        set name $object_id-[clock clicks -microseconds]$ext
+        set name $object_id-[clock clicks -microseconds]
         set item_id [::xo::db::sql::content_item new \
                          -name            $name \
                          -parent_id       [require_root_folder] \
@@ -105,8 +109,7 @@ namespace eval ::richtext::ckeditor4::ckfinder {
         return [list \
                     success $success \
                     name $name \
-                    image_id $revision_id \
-                    image_url $image_url?image_id=$revision_id \
+                    file_id $revision_id \
                     width $width \
                     height $height \
                    ]

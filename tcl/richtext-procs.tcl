@@ -17,10 +17,10 @@ namespace eval ::richtext::ckeditor4 {
     set package_id [apm_package_id_from_key "richtext-ckeditor4"]
 
     # ns_section ns/server/${server}/acs/richtext-ckeditor
-    #        ns_param CKEditorVersion 4.7.1
-    #        ns_param CKEditorPackage standard
-    #        ns_param CKFinderURL     /acs-content-repository/ckfinder
-    #        ns_param StandardPlugins "uploadimage"
+    #        ns_param CKEditorVersion   4.7.1
+    #        ns_param CKEditorPackage   standard
+    #        ns_param CKFinderURL       /acs-content-repository/ckfinder
+    #        ns_param StandardPlugins   uploadimage
     #
     set version [parameter::get \
                      -package_id $package_id \
@@ -45,7 +45,7 @@ namespace eval ::richtext::ckeditor4 {
     set ck_package [parameter::get \
                               -package_id $package_id \
                               -parameter CKEditorPackage \
-                              -default "standard"]
+                        -default "standard"]
 
     ad_proc initialize_widget {
         -form_id
@@ -96,15 +96,27 @@ namespace eval ::richtext::ckeditor4 {
                 break
             }
         }
-        set upload_url [export_vars \
-                            -base $::richtext::ckeditor4::ckfinder_url/upload {
-                                {object_id $displayed_object_id} {type Images}
-                            }]
+        set image_upload_url [export_vars \
+                                  -base $::richtext::ckeditor4::ckfinder_url/uploadimage {
+                                      {object_id $displayed_object_id} {type Images}
+                                  }]
+        set file_upload_url [export_vars \
+                                 -base $::richtext::ckeditor4::ckfinder_url/upload {
+                                     {object_id $displayed_object_id} {type Files} {command QuickUpload}
+                                 }]
+        set file_browse_url [export_vars \
+                                 -base $::richtext::ckeditor4::ckfinder_url/browse {
+                                     {object_id $displayed_object_id} {type Files}
+                                 }]
         lappend ckOptionsList \
             "language: '[lang::conn::language]'" \
             "disableNativeSpellChecker: false" \
             "scayt_autoStartup: [dict get $options spellcheck]" \
-            "imageUploadUrl: '$upload_url'"
+            "imageUploadUrl: '$image_upload_url'" \
+            "filebrowserBrowseUrl: '$file_browse_url'" \
+            "filebrowserUploadUrl: '$file_upload_url'" \
+            "filebrowserWindowWidth: '800'" \
+            "filebrowserWindowHeight: '600'"
 
         set plugins [split $::richtext::ckeditor4::standard_plugins ,]
         if {[dict exists $options plugins]} {
@@ -192,8 +204,6 @@ namespace eval ::richtext::ckeditor4 {
 
         set suffix $version/$ck_package/ckeditor.js
         set resources $::acs::rootdir/packages/richtext-ckeditor4/www/resources
-        ns_log notice "ACS::ROOT <$::acs::rootdir>"
-        ns_log notice "CHECK <$resources/$suffix>"
         if {[file exists $resources/$suffix]} {
             lappend result file $resources/$suffix
             lappend result resources /resources/richtext-ckeditor4/$suffix
