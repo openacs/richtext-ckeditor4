@@ -13,8 +13,15 @@
 # URLs .../upload and .../view via ns_register_proc. This might change
 # in the future.
 #
+# NOTE: the delivery of files performs two permission checks, once in
+# the request processor (checking the site nodes) and once for the
+# concrete image.  In order to make uploaded images readable by "The
+# Public", make sure that the package_id pointed to by the CKFinderURL
+# (per default /acs-content-repository) offers as well read
+# permissions to the public.
+
 # This interface can be used obtaining a customized version of
-# ckeditor containing he "uploadimage" plugin. When this is installed,
+# CKEditor containing he "uploadimage" plugin. When this is installed,
 # it can be used e.g. with a widget spec like the following
 #
 #    {text:richtext(richtext)
