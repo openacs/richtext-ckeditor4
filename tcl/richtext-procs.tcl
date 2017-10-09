@@ -25,7 +25,7 @@ namespace eval ::richtext::ckeditor4 {
     set version [parameter::get \
                      -package_id $package_id \
                      -parameter CKEditorVersion \
-                     -default 4.7.1]
+                     -default 4.7.3]
     set ckfinder_url [parameter::get \
                           -package_id $package_id \
                           -parameter CKFinderURL \
