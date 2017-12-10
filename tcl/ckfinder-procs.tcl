@@ -10,7 +10,13 @@ ad_library {
     @author Gustaf Neumann
     @creation-date 15 Aug 2017
     @cvs-id $Id$
-}
+
+    NOTE: the delivery of files performs two permission checks, once
+    in the requestprocessor (the site nodes) and once for the concrete image.
+    If one whishes to make uploaded images readable by "The Public", make
+    sure that the /
+
+} 
 
 namespace eval ::richtext::ckeditor4::ckfinder {
 

@@ -17,7 +17,7 @@ namespace eval ::richtext::ckeditor4 {
     set package_id [apm_package_id_from_key "richtext-ckeditor4"]
 
     # ns_section ns/server/${server}/acs/richtext-ckeditor
-    #        ns_param CKEditorVersion   4.7.1
+    #        ns_param CKEditorVersion   4.7.3
     #        ns_param CKEditorPackage   standard
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
