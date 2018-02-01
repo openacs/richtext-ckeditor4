@@ -7,7 +7,7 @@
 The current version of CKEditor is @version@.
 <if @resources@ not nil><p>This version of CKEditor is installed locally
 under <strong>@resources@</strong></if>
-<else><p>In the current installation, this version of KEditor can be used via CDN <strong>@cdn@</strong>.
+<else><p>In the current installation, this version of CKEditor can be used via CDN <strong>@cdn@</strong>.
   <if @writable@ true>
   <p>Do you want to <a href="download" class="button">download</a>
   version @version@ of CKEditor to your file system?</p>
