@@ -17,7 +17,7 @@ namespace eval ::richtext::ckeditor4 {
     set package_id [apm_package_id_from_key "richtext-ckeditor4"]
 
     # ns_section ns/server/${server}/acs/richtext-ckeditor
-    #        ns_param CKEditorVersion   4.7.3
+    #        ns_param CKEditorVersion   4.8.0
     #        ns_param CKEditorPackage   standard
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
@@ -25,7 +25,7 @@ namespace eval ::richtext::ckeditor4 {
     set version [parameter::get \
                      -package_id $package_id \
                      -parameter CKEditorVersion \
-                     -default 4.7.3]
+                     -default 4.8.0]
     set ckfinder_url [parameter::get \
                           -package_id $package_id \
                           -parameter CKFinderURL \
@@ -43,8 +43,8 @@ namespace eval ::richtext::ckeditor4 {
     # and rename the expanded top-folder from "ckeditor" to "custom"
     #
     set ck_package [parameter::get \
-                              -package_id $package_id \
-                              -parameter CKEditorPackage \
+                        -package_id $package_id \
+                        -parameter CKEditorPackage \
                         -default "standard"]
 
     ad_proc initialize_widget {
@@ -53,10 +53,10 @@ namespace eval ::richtext::ckeditor4 {
         {-options {}}
     } {
 
-        Initialize an CKEditor richtext editor widget.
+        Initialize an CKEditor 4 richtext editor widget.
 
     } {
-        ns_log debug "initialize CKEditor instance with <$options>"
+        ns_log debug "initialize CKEditor 4 instance with <$options>"
 
         # Allow per default all CSS-classes, unless the user has specified
         # it differently
@@ -215,6 +215,9 @@ namespace eval ::richtext::ckeditor4 {
         if {[file exists $resources/$suffix]} {
             lappend result file $resources/$suffix
             lappend result resources /resources/richtext-ckeditor4/$suffix
+            lappend result basedir /resources/richtext-ckeditor4/$version/$ck_package
+        } else {
+            lappend result basedir //cdn.ckeditor.com/$version/$ck_package
         }
         lappend result cdn "//cdn.ckeditor.com/$suffix"
 
@@ -224,6 +227,8 @@ namespace eval ::richtext::ckeditor4 {
     ad_proc ::richtext::ckeditor4::add_editor {
         {-ck_package ""}
         {-version ""}
+        {-adapters ""}
+        {-order 10}
     } {
 
         Add the necessary JavaScript and other files to the current
@@ -242,13 +247,17 @@ namespace eval ::richtext::ckeditor4 {
                               -version $version]
 
         if {[dict exists $version_info resources]} {
-            template::head::add_javascript \
+            template::head::add_javascript -order $order \
                 -src [dict get $version_info resources]
         } else {
-            template::head::add_javascript -src [dict get $version_info cdn]
+            template::head::add_javascript -order $order -src [dict get $version_info cdn]
             security::csp::require script-src cdn.ckeditor.com
             security::csp::require style-src cdn.ckeditor.com
             security::csp::require img-src cdn.ckeditor.com
+        }
+        foreach adapter $adapters {
+            template::head::add_javascript -order $order.1 \
+                -src [dict get $version_info basedir]/adapters/$adapter
         }
 
         #
