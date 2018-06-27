@@ -17,7 +17,7 @@ namespace eval ::richtext::ckeditor4 {
     set package_id [apm_package_id_from_key "richtext-ckeditor4"]
 
     # ns_section ns/server/${server}/acs/richtext-ckeditor
-    #        ns_param CKEditorVersion   4.8.0
+    #        ns_param CKEditorVersion   4.9.2
     #        ns_param CKEditorPackage   standard
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
@@ -25,7 +25,7 @@ namespace eval ::richtext::ckeditor4 {
     set version [parameter::get \
                      -package_id $package_id \
                      -parameter CKEditorVersion \
-                     -default 4.8.0]
+                     -default 4.9.2]
     set ckfinder_url [parameter::get \
                           -package_id $package_id \
                           -parameter CKFinderURL \
@@ -56,7 +56,7 @@ namespace eval ::richtext::ckeditor4 {
         Initialize an CKEditor 4 richtext editor widget.
 
     } {
-        ns_log debug "initialize CKEditor 4 instance with <$options>"
+        ns_log debug "CKEditor 4: initialize instance with <$options>"
 
         # Allow per default all CSS-classes, unless the user has specified
         # it differently
@@ -146,6 +146,7 @@ namespace eval ::richtext::ckeditor4 {
         }
 
         set ckOptions [join $ckOptionsList ", "]
+        ns_log debug "CKEditor 4: final ckOptions = $ckOptions"
 
         #
         # Add the configuration via body script
@@ -245,7 +246,7 @@ namespace eval ::richtext::ckeditor4 {
         set version_info [::richtext::ckeditor4::version_info \
                               -ck_package $ck_package \
                               -version $version]
-
+        
         if {[dict exists $version_info resources]} {
             template::head::add_javascript -order $order \
                 -src [dict get $version_info resources]
