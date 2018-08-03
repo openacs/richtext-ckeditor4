@@ -17,7 +17,7 @@ namespace eval ::richtext::ckeditor4 {
     set package_id [apm_package_id_from_key "richtext-ckeditor4"]
 
     # ns_section ns/server/${server}/acs/richtext-ckeditor
-    #        ns_param CKEditorVersion   4.9.2
+    #        ns_param CKEditorVersion   4.10.0
     #        ns_param CKEditorPackage   standard
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
@@ -25,7 +25,7 @@ namespace eval ::richtext::ckeditor4 {
     set version [parameter::get \
                      -package_id $package_id \
                      -parameter CKEditorVersion \
-                     -default 4.9.2]
+                     -default 4.10.0]
     set ckfinder_url [parameter::get \
                           -package_id $package_id \
                           -parameter CKFinderURL \
@@ -191,7 +191,7 @@ namespace eval ::richtext::ckeditor4 {
         #
     }
 
-    ad_proc ::richtext::ckeditor4::version_info {
+    ad_proc ::richtext::ckeditor4::resource_info {
         {-ck_package ""}
         {-version ""}
     } {
@@ -201,7 +201,7 @@ namespace eval ::richtext::ckeditor4 {
 
     } {
         #
-        # If no version or ck editor package are specified, use the
+        # If no version or CKeditor package are specified, use the
         # namespaced variables as default.
         #
         if {$version eq ""} {
@@ -211,16 +211,37 @@ namespace eval ::richtext::ckeditor4 {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
 
+        #
+        # Setup variables for access via CDN vs. local resources.
+        #
+        set resourceDir [acs_package_root_dir richtext-ckeditor4/www/resources]
+	set resourceUrl /resources/richtext-ckeditor4
+        set cdn         //cdn.ckeditor.com/
+
         set suffix $version/$ck_package/ckeditor.js
-        set resources $::acs::rootdir/packages/richtext-ckeditor4/www/resources
-        if {[file exists $resources/$suffix]} {
-            lappend result file $resources/$suffix
-            lappend result resources /resources/richtext-ckeditor4/$suffix
-            lappend result basedir /resources/richtext-ckeditor4/$version/$ck_package
-        } else {
-            lappend result basedir //cdn.ckeditor.com/$version/$ck_package
+
+        if {[file exists $resourceDir/$version/$ck_package]} {
+	    set prefix  $resourceUrl/$version
+	    set cdnHost ""
+	} else {
+	    set prefix $cdn/$version
+	    set cdnHost cdn.ckeditor.com
         }
-        lappend result cdn "//cdn.ckeditor.com/$suffix"
+
+        #
+        # Return the dict with at least the required fields
+        #
+        lappend result \
+	    resourceName "CKEditor 4" \
+	    resourceDir $resourceDir \
+            cdn $cdn \
+	    cdnHost $cdnHost \
+	    prefix $prefix \
+	    cssFiles {} \
+            jsFiles  {} \
+            extraFiles {} \
+            downloadURLs http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${ck_package}.zip \
+	    urnMap {}
 
         return $result
     }
@@ -243,26 +264,35 @@ namespace eval ::richtext::ckeditor4 {
         customization.
 
     } {
-        set version_info [::richtext::ckeditor4::version_info \
+        if {$version eq ""} {
+            set version ${::richtext::ckeditor4::version}
+        }
+        if {$ck_package eq ""} {
+            set ck_package ${::richtext::ckeditor4::ck_package}
+        }
+
+        set resource_info [::richtext::ckeditor4::resource_info \
                               -ck_package $ck_package \
                               -version $version]
+
+        set prefix [dict get $resource_info prefix]
         
-        if {[dict exists $version_info resources]} {
-            template::head::add_javascript -order $order \
-                -src [dict get $version_info resources]
-        } else {
-            template::head::add_javascript -order $order -src [dict get $version_info cdn]
-            security::csp::require script-src cdn.ckeditor.com
-            security::csp::require style-src cdn.ckeditor.com
-            security::csp::require img-src cdn.ckeditor.com
+        if {[dict exists $resource_info cdnHost] && [dict get $resource_info cdnHost] ne ""} {
+            security::csp::require script-src [dict get $resource_info cdnHost]
+            security::csp::require style-src  [dict get $resource_info cdnHost]
+            security::csp::require img-src    [dict get $resource_info cdnHost]
         }
+        ns_log notice "SRC -src $prefix/$ck_package/ckeditor.js"
+        template::head::add_javascript -order $order \
+            -src $prefix/$ck_package/ckeditor.js
+
         foreach adapter $adapters {
             template::head::add_javascript -order $order.1 \
-                -src [dict get $version_info basedir]/adapters/$adapter
+                -src $prefix/adapters/$adapter
         }
 
         #
-        # add required general directives for content security policies
+        # Add required general directives for content security policies.
         #
         security::csp::require script-src 'unsafe-eval'
         security::csp::require -force script-src 'unsafe-inline'
@@ -287,7 +317,7 @@ namespace eval ::richtext::ckeditor4 {
 
     } {
         #
-        # If no version or ck editor package are specified, use the
+        # If no version or ck_package are specified, use the
         # namespaced variables as default.
         #
         if {$version eq ""} {
@@ -296,9 +326,16 @@ namespace eval ::richtext::ckeditor4 {
         if {$ck_package eq ""} {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
+        
+        set resource_info [::richtext::ckeditor4::resource_info \
+                               -ck_package $ck_package \
+                               -version $version]
+        
+        ::util::resources::download \
+            -resource_info $resource_info \
+            -version_dir $version
 
-        set download_url http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${ck_package}.zip
-        set resources $::acs::rootdir/packages/richtext-ckeditor4/www/resources
+        set resourceDir [dict get $resource_info resourceDir]
 
         #
         # Do we have unzip installed?
@@ -309,32 +346,24 @@ namespace eval ::richtext::ckeditor4 {
         }
 
         #
-        # Do we have a writable output directory under resources?
+        # Do we have a writable output directory under resourceDir?
         #
-        if {![file isdirectory $resources/$version]} {
-            file mkdir $resources/$version
+        if {![file isdirectory $resourceDir/$version]} {
+            file mkdir $resourceDir/$version
         }
-        if {![file writable $resources/$version]} {
-            error "directory $resources/$version is not writable"
+        if {![file writable $resourceDir/$version]} {
+            error "directory $resourceDir/$version is not writable"
         }
 
         #
-        # So far, everything is fine, download the editor package
+        # So far, everything is fine, unpack the editor package.
         #
-        set result [util::http::get -url $download_url -spool]
-        #ns_log notice "GOT $result"
-        if {[dict get $result status] == 200} {
-            #
-            # The Download was successful, unzip it and let the
-            # directory structure look similar as on the CDN.
-            #
-            set fn [dict get $result file]
-            set output [exec $unzip -o $fn -d $resources/$version]
+        foreach url [dict get $resource_info downloadURLs] {
+            set fn [file tail $url]
+            set output [exec $unzip -o $resourceDir/$version/$fn -d $resourceDir/$version]
             file rename -- \
-                $resources/$version/ckeditor \
-                $resources/$version/$ck_package
-        } else {
-            error "download of $download_url failed, HTTP status: [dict get $result status]"
+                $resourceDir/$version/ckeditor \
+                $resourceDir/$version/$ck_package
         }
     }
 
