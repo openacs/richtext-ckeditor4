@@ -288,7 +288,7 @@ namespace eval ::richtext::ckeditor4 {
 
         foreach adapter $adapters {
             template::head::add_javascript -order $order.1 \
-                -src $prefix/adapters/$adapter
+                -src $prefix/$ck_package/adapters/$adapter
         }
 
         #
