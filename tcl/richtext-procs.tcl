@@ -89,7 +89,7 @@ namespace eval ::richtext::ckeditor4 {
         lappend ckOptionsList \
             "language: '[lang::conn::language]'" \
             "disableNativeSpellChecker: false" \
-            "scayt_autoStartup: [dict get $options spellcheck]" 
+            "scayt_autoStartup: [dict get $options spellcheck]"
 
         #
         # Get the property "displayed_object_id" from the call-stack
@@ -125,7 +125,7 @@ namespace eval ::richtext::ckeditor4 {
                 "filebrowserWindowWidth: '800'" \
                 "filebrowserWindowHeight: '600'"
         }
-        
+
         set plugins [split $::richtext::ckeditor4::standard_plugins ,]
         if {[dict exists $options plugins]} {
             lappend plugins {*}[split [dict get $options plugins] ,]
@@ -215,33 +215,33 @@ namespace eval ::richtext::ckeditor4 {
         # Setup variables for access via CDN vs. local resources.
         #
         set resourceDir [acs_package_root_dir richtext-ckeditor4/www/resources]
-	set resourceUrl /resources/richtext-ckeditor4
+        set resourceUrl /resources/richtext-ckeditor4
         set cdn         //cdn.ckeditor.com/
 
         set suffix $version/$ck_package/ckeditor.js
 
         if {[file exists $resourceDir/$version/$ck_package]} {
-	    set prefix  $resourceUrl/$version
-	    set cdnHost ""
-	} else {
-	    set prefix $cdn/$version
-	    set cdnHost cdn.ckeditor.com
+            set prefix  $resourceUrl/$version
+            set cdnHost ""
+        } else {
+            set prefix $cdn/$version
+            set cdnHost cdn.ckeditor.com
         }
 
         #
         # Return the dict with at least the required fields
         #
         lappend result \
-	    resourceName "CKEditor 4" \
-	    resourceDir $resourceDir \
+            resourceName "CKEditor 4" \
+            resourceDir $resourceDir \
             cdn $cdn \
-	    cdnHost $cdnHost \
-	    prefix $prefix \
-	    cssFiles {} \
+            cdnHost $cdnHost \
+            prefix $prefix \
+            cssFiles {} \
             jsFiles  {} \
             extraFiles {} \
             downloadURLs http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${ck_package}.zip \
-	    urnMap {}
+            urnMap {}
 
         return $result
     }
@@ -276,7 +276,7 @@ namespace eval ::richtext::ckeditor4 {
                               -version $version]
 
         set prefix [dict get $resource_info prefix]
-        
+
         if {[dict exists $resource_info cdnHost] && [dict get $resource_info cdnHost] ne ""} {
             security::csp::require script-src [dict get $resource_info cdnHost]
             security::csp::require style-src  [dict get $resource_info cdnHost]
@@ -326,11 +326,11 @@ namespace eval ::richtext::ckeditor4 {
         if {$ck_package eq ""} {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
-        
+
         set resource_info [::richtext::ckeditor4::resource_info \
                                -ck_package $ck_package \
                                -version $version]
-        
+
         ::util::resources::download \
             -resource_info $resource_info \
             -version_dir $version
@@ -366,7 +366,6 @@ namespace eval ::richtext::ckeditor4 {
                 $resourceDir/$version/$ck_package
         }
     }
-
 }
 
 
