@@ -16,24 +16,29 @@ namespace eval ::richtext::ckeditor4 {
 
     set package_id [apm_package_id_from_key "richtext-ckeditor4"]
 
+    #
+    # The CKeditor 4 configuration can be tailored via the NaviServer
+    # config file:
+    #
     # ns_section ns/server/${server}/acs/richtext-ckeditor
     #        ns_param CKEditorVersion   4.10.0
     #        ns_param CKEditorPackage   standard
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
     #
-    set version [parameter::get \
-                     -package_id $package_id \
-                     -parameter CKEditorVersion \
-                     -default 4.10.0]
-    set ckfinder_url [parameter::get \
-                          -package_id $package_id \
-                          -parameter CKFinderURL \
-                          -default /acs-content-repository/ckfinder]
-    set standard_plugins [parameter::get \
-                              -package_id $package_id \
-                              -parameter StandardPlugins \
-                              -default ""]
+    set ::richtext::ckeditor4::version [parameter::get \
+                                            -package_id $package_id \
+                                            -parameter CKEditorVersion \
+                                            -default 4.10.0]
+    
+    set ::richtext::ckeditor4::ckfinder_url [parameter::get \
+                                                 -package_id $package_id \
+                                                 -parameter CKFinderURL \
+                                                 -default /acs-content-repository/ckfinder]
+    set ::richtext::ckeditor4::standard_plugins [parameter::get \
+                                                     -package_id $package_id \
+                                                     -parameter StandardPlugins \
+                                                     -default ""]
 
     #
     # The cp_package might be basic, standard, of full;
