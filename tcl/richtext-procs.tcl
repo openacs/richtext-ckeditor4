@@ -21,7 +21,7 @@ namespace eval ::richtext::ckeditor4 {
     # config file:
     #
     # ns_section ns/server/${server}/acs/richtext-ckeditor
-    #        ns_param CKEditorVersion   4.11.2
+    #        ns_param CKEditorVersion   4.11.3
     #        ns_param CKEditorPackage   standard
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
@@ -29,7 +29,7 @@ namespace eval ::richtext::ckeditor4 {
     set ::richtext::ckeditor4::version [parameter::get \
                                             -package_id $package_id \
                                             -parameter CKEditorVersion \
-                                            -default 4.11.2]
+                                            -default 4.11.3]
     
     set ::richtext::ckeditor4::ckfinder_url [parameter::get \
                                                  -package_id $package_id \
