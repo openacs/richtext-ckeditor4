@@ -216,7 +216,7 @@ if {$::tcl_version eq "8.5"} {
     #
     # In Tcl 8.5, "::try" was not yet a built-in of Tcl
     #
-    package require try 
+    package require try
 }
 
 ns_register_proc GET $::richtext::ckeditor4::ckfinder_url/view {

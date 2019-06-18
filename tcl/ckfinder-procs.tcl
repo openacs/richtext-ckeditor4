@@ -16,7 +16,7 @@ ad_library {
     If one whishes to make uploaded images readable by "The Public", make
     sure that the /
 
-} 
+}
 
 namespace eval ::richtext::ckeditor4::ckfinder {
 
