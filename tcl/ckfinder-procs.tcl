@@ -4,7 +4,7 @@ ad_library {
 
     This script defines the following public procs:
 
-       ::richtext::ckeditor4::ckfinder::image_attach
+       ::richtext::ckeditor4::ckfinder::file_attach
        ::richtext::ckeditor4::ckfinder::return_file
 
     @author Gustaf Neumann
@@ -63,7 +63,7 @@ namespace eval ::richtext::ckeditor4::ckfinder {
                     set success 1
                 }
                 default {
-                    ns_log warning "image_attach: can't handle image type '$mime_type'"
+                    ns_log warning "file_attach: can't handle image type '$mime_type'"
                     return [list \
                                 success 0 \
                                 errMsg "can't handle image type '$mime_type'"]
