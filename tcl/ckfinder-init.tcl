@@ -21,7 +21,7 @@
 # permissions to the public.
 
 # This interface can be used obtaining a customized version of
-# CKEditor containing he "uploadimage" plugin. When this is installed,
+# CKEditor containing the "uploadimage" plugin. When this is installed,
 # it can be used e.g. with a widget spec like the following
 #
 #    {text:richtext(richtext)
@@ -66,7 +66,7 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/uploadimage {
     if {[llength $complaints] == 0 && $type eq "Images"} {
 
         set form [ns_getform]
-        set d [::richtext::ckeditor4::ckfinder::image_attach \
+        set d [::richtext::ckeditor4::ckfinder::file_attach \
                    -object_id   $object_id \
                    -import_file [ns_set get $form upload.tmpfile] \
                    -mime_type   [ns_set get $form upload.content-type] \
@@ -93,7 +93,7 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/uploadimage {
             }}]
         } else {
             #
-            # ckfinder::image_attach returned an error
+            # ckfinder::file_attach returned an error
             #
             set errMsg [dict get $d errMsg]
         }
@@ -160,7 +160,7 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/upload {
             }]
         } else {
             #
-            # ckfinder::image_attach returned an error
+            # ckfinder::file_attach returned an error
             #
             set errMsg [dict get $d errMsg]
         }
