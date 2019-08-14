@@ -106,6 +106,7 @@ namespace eval ::richtext::ckeditor4 {
                 break
             }
         }
+        ns_log notice "displayed_object_id ? [info exists displayed_object_id]"
         if {[info exists displayed_object_id]} {
             #
             # If we have a displayed_object_id, configure it for the
@@ -123,8 +124,13 @@ namespace eval ::richtext::ckeditor4 {
                                      -base $::richtext::ckeditor4::ckfinder_url/browse {
                                          {object_id $displayed_object_id} {type Files}
                                      }]
+            set image_browse_url [export_vars \
+                                     -base $::richtext::ckeditor4::ckfinder_url/browse {
+                                         {object_id $displayed_object_id} {type Images}
+                                     }]
             lappend ckOptionsList \
-                "imageUploadUrl: '$image_upload_url'" \
+                "filebrowserImageUploadUrl: '$image_upload_url'" \
+                "filebrowserImageBrowseUrl: '$image_browse_url'" \
                 "filebrowserBrowseUrl: '$file_browse_url'" \
                 "filebrowserUploadUrl: '$file_upload_url'" \
                 "filebrowserWindowWidth: '800'" \
