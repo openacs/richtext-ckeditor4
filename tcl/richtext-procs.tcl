@@ -2,10 +2,13 @@ ad_library {
 
     CKEditor 4 integration with the richtext widget of acs-templating.
 
-    This script defines the following two procs:
+    This script defines the following public procs:
 
-       ::richtext-ckeditor4::initialize_widget
-       ::richtext-ckeditor4::render_widgets
+    ::richtext-ckeditor4::initialize_widget
+    ::richtext-ckeditor4::render_widgets
+    ::richtext::ckeditor4::resource_info
+    ::richtext::ckeditor4::add_editor
+
 
     @author Gustaf Neumann
     @creation-date 1 Jan 2016
@@ -21,7 +24,7 @@ namespace eval ::richtext::ckeditor4 {
     # config file:
     #
     # ns_section ns/server/${server}/acs/richtext-ckeditor
-    #        ns_param CKEditorVersion   4.12.1
+    #        ns_param CKEditorVersion   4.13.0
     #        ns_param CKEditorPackage   standard
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
@@ -29,8 +32,8 @@ namespace eval ::richtext::ckeditor4 {
     set ::richtext::ckeditor4::version [parameter::get \
                                             -package_id $package_id \
                                             -parameter CKEditorVersion \
-                                            -default 4.12.1]
-    
+                                            -default 4.13.0]
+
     set ::richtext::ckeditor4::ckfinder_url [parameter::get \
                                                  -package_id $package_id \
                                                  -parameter CKFinderURL \
@@ -41,16 +44,16 @@ namespace eval ::richtext::ckeditor4 {
                                                      -default ""]
 
     #
-    # The cp_package might be basic, standard, of full;
+    # The "cp_package" might be "basic", "standard", of "full";
     #
     # Use "custom" for customized downloads, expand the downloaded zip file in
     #    richtext-ckeditor4/www/resources/$version
     # and rename the expanded top-folder from "ckeditor" to "custom"
     #
-    set ck_package [parameter::get \
-                        -package_id $package_id \
-                        -parameter CKEditorPackage \
-                        -default "standard"]
+    set ::richtext::ckeditor4::ck_package [parameter::get \
+                                               -package_id $package_id \
+                                               -parameter CKEditorPackage \
+                                               -default "standard"]
 
     ad_proc initialize_widget {
         -form_id
@@ -106,7 +109,8 @@ namespace eval ::richtext::ckeditor4 {
                 break
             }
         }
-        ns_log notice "ckeditor initialize_widget: ¿displayed_object_id ?[info exists displayed_object_id]"
+        
+        #ns_log notice "ckeditor initialize_widget: displayed_object_id [info exists displayed_object_id]"
         if {[info exists displayed_object_id]} {
             #
             # If we have a displayed_object_id, configure it for the
@@ -125,9 +129,9 @@ namespace eval ::richtext::ckeditor4 {
                                          {object_id $displayed_object_id} {type Files}
                                      }]
             set image_browse_url [export_vars \
-                                     -base $::richtext::ckeditor4::ckfinder_url/browse {
-                                         {object_id $displayed_object_id} {type Images}
-                                     }]
+                                      -base $::richtext::ckeditor4::ckfinder_url/browse {
+                                          {object_id $displayed_object_id} {type Images}
+                                      }]
             lappend ckOptionsList \
                 "filebrowserImageUploadUrl: '$image_upload_url'" \
                 "filebrowserImageBrowseUrl: '$image_browse_url'" \
@@ -184,8 +188,8 @@ namespace eval ::richtext::ckeditor4 {
         at a time when all rich-text widgets of this page are already
         initialized. The function is controlled via the global variables
 
-           ::acs_blank_master(ckeditor4)
-           ::acs_blank_master__htmlareas
+        ::acs_blank_master(ckeditor4)
+        ::acs_blank_master__htmlareas
 
     } {
         #
@@ -281,19 +285,21 @@ namespace eval ::richtext::ckeditor4 {
         if {$ck_package eq ""} {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
+        #ns_log notice "richtext::ckeditor4::add_editor -version $version -ck_package $ck_package"
 
         set resource_info [::richtext::ckeditor4::resource_info \
-                              -ck_package $ck_package \
-                              -version $version]
+                               -ck_package $ck_package \
+                               -version $version]
 
         set prefix [dict get $resource_info prefix]
+        #ns_log notice "richtext::ckeditor4::add_editor loading from $prefix"
 
         if {[dict exists $resource_info cdnHost] && [dict get $resource_info cdnHost] ne ""} {
             security::csp::require script-src [dict get $resource_info cdnHost]
             security::csp::require style-src  [dict get $resource_info cdnHost]
             security::csp::require img-src    [dict get $resource_info cdnHost]
         }
-        ns_log notice "SRC -src $prefix/$ck_package/ckeditor.js"
+        #ns_log notice "richtext::ckeditor4::add_editor SRC -src $prefix/$ck_package/ckeditor.js"
         template::head::add_javascript -order $order \
             -src $prefix/$ck_package/ckeditor.js
 
@@ -312,7 +318,7 @@ namespace eval ::richtext::ckeditor4 {
         security::csp::require img-src data:
     }
 
-    ad_proc ::richtext::ckeditor4::download {
+    ad_proc -private ::richtext::ckeditor4::download {
         {-ck_package ""}
         {-version ""}
     } {
