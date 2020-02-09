@@ -16,3 +16,9 @@ set resource_info [::richtext::ckeditor4::resource_info -ck_package $ck_package]
 set title "[dict get $resource_info resourceName] - Sitewide Admin"
 set context [list $title]
 
+
+# Local variables:
+#    mode: tcl
+#    tcl-indent-level: 4
+#    indent-tabs-mode: nil
+# End:
