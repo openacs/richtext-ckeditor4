@@ -212,7 +212,7 @@ namespace eval ::richtext::ckeditor4 {
     } {
 
         Get information about available version(s) of CKEditor, either
-        from the local file system, or from CDN.
+        from the local filesystem, or from CDN.
 
     } {
         #
