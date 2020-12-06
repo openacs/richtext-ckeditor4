@@ -25,7 +25,7 @@ namespace eval ::richtext::ckeditor4 {
     #
     # ns_section ns/server/${server}/acs/richtext-ckeditor
     #        ns_param CKEditorVersion   4.15.1
-    #        ns_param CKEditorPackage   standard
+    #        ns_param CKEditorPackage   full
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
     #
@@ -53,7 +53,7 @@ namespace eval ::richtext::ckeditor4 {
     set ::richtext::ckeditor4::ck_package [parameter::get \
                                                -package_id $package_id \
                                                -parameter CKEditorPackage \
-                                               -default "standard"]
+                                               -default "full"]
 
     ad_proc initialize_widget {
         -form_id
