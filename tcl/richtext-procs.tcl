@@ -44,7 +44,7 @@ namespace eval ::richtext::ckeditor4 {
                                                      -default ""]
 
     #
-    # The "cp_package" might be "basic", "standard", of "full";
+    # The "ck_package" might be "basic", "standard", of "full";
     #
     # Use "custom" for customized downloads, expand the downloaded zip file in
     #    richtext-ckeditor4/www/resources/$version
@@ -343,6 +343,7 @@ namespace eval ::richtext::ckeditor4 {
         if {$ck_package eq ""} {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
+
 
         set resource_info [::richtext::ckeditor4::resource_info \
                                -ck_package $ck_package \
