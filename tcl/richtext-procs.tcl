@@ -53,7 +53,7 @@ namespace eval ::richtext::ckeditor4 {
     set ::richtext::ckeditor4::ck_package [parameter::get \
                                                -package_id $package_id \
                                                -parameter CKEditorPackage \
-                                               -default "full"]
+                                               -default "standard"]
 
     ad_proc initialize_widget {
         -form_id
