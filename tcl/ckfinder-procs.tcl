@@ -179,9 +179,8 @@ namespace eval ::richtext::ckeditor4::ckfinder {
         #
         # Process params provided by the query
         #
-        foreach p [split [ns_conn query] &] {
-            lassign [split $p =] var value
-            set param($var) $value
+        foreach {key value} [ns_set array [ns_parsequery [ns_conn query]]] {
+            set param($key) $value
         }
         #ns_log notice "provided params [array get param]"
         #
