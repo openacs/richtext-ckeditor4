@@ -378,7 +378,7 @@ namespace eval ::richtext::ckeditor4 {
         #
         foreach url [dict get $resource_info downloadURLs] {
             set fn [file tail $url]
-            set output [exec $unzip -o $resourceDir/$version/$fn -d $resourceDir/$version]
+            util::unzip -overwrite -source $resourceDir/$version/$fn -destination $resourceDir/$version
             file rename -- \
                 $resourceDir/$version/ckeditor \
                 $resourceDir/$version/$ck_package
