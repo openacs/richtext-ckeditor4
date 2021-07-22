@@ -24,7 +24,7 @@ namespace eval ::richtext::ckeditor4 {
     # config file:
     #
     # ns_section ns/server/${server}/acs/richtext-ckeditor
-    #        ns_param CKEditorVersion   4.15.1
+    #        ns_param CKEditorVersion   4.16.1
     #        ns_param CKEditorPackage   full
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
@@ -32,7 +32,7 @@ namespace eval ::richtext::ckeditor4 {
     set ::richtext::ckeditor4::version [parameter::get \
                                             -package_id $package_id \
                                             -parameter CKEditorVersion \
-                                            -default 4.15.1]
+                                            -default 4.16.1]
 
     set ::richtext::ckeditor4::ckfinder_url [parameter::get \
                                                  -package_id $package_id \
@@ -234,7 +234,9 @@ namespace eval ::richtext::ckeditor4 {
         set cdn         //cdn.ckeditor.com/
 
         set suffix $version/$ck_package/ckeditor.js
-
+        ns_log notice "CKeditor4: check for locally installed file" \
+            $resourceDir/$version/$ck_package -> \
+            [file exists $resourceDir/$version/$ck_package]
         if {[file exists $resourceDir/$version/$ck_package]} {
             set prefix  $resourceUrl/$version
             set cdnHost ""

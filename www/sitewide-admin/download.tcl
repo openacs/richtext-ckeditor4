@@ -3,7 +3,7 @@ ad_page_contract {
 
     @creation-date Jan 04, 2017
 } {
-    {ck_package:word,notnull ""}
+    {ck_package:token,notnull ""}
     {version:word,notnull ""}
 }
 
