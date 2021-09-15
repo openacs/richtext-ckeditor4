@@ -16,8 +16,8 @@
         <maturity>2</maturity>
 
         <provides url="richtext-ckeditor4" version="0.23"/>
-        <requires url="acs-templating" version="5.10.0b1"/>
-        <requires url="acs-tcl" version="5.10.0b1"/>
+        <requires url="acs-templating" version="5.10.0"/>
+        <requires url="acs-tcl" version="5.10.0"/>
         <requires url="attachments" version="0.11"/>
 
         <callbacks>
