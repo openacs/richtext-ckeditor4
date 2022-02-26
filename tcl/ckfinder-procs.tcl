@@ -78,7 +78,7 @@ namespace eval ::richtext::ckeditor4::ckfinder {
         # Create a new item without child_rels
         #
         set name $object_id-[clock clicks -microseconds]
-        set item_id [::xo::db::sql::content_item new \
+        set item_id [::acs::dc call content_item new \
                          -name            $name \
                          -parent_id       [require_root_folder] \
                          -context_id      $object_id \
