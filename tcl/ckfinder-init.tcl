@@ -185,26 +185,34 @@ ns_register_proc GET $::richtext::ckeditor4::ckfinder_url/browse {
     # File-browser (for the standard "filebrowser" plugin)
     #
     set complaints [::richtext::ckeditor4::ckfinder::query_page_contract {
-        {object_id:naturalnum}
+        {object_id:object_id}
         {type:word}
         {CKEditorFuncNum ""}
         {CKEditor:word ""}
         {langCode en}
     }]
 
-    permission::require_permission \
-        -party_id [ad_conn user_id] \
-        -object_id $object_id \
-        -privilege read
+    if {[llength $complaints] == 0} {
+        permission::require_permission \
+            -party_id [ad_conn user_id] \
+            -object_id $object_id \
+            -privilege read
 
-    set reply [template::adp_include \
-                   /packages/richtext-ckeditor4/lib/file-browser [subst {
-                       object_id "$object_id"
-                       type "$type"
-                       CKEditorFuncNum "$CKEditorFuncNum"
-                       CKEditor "$CKEditor"
-                       langCode "$langCode"
-    }]]
+        set reply [template::adp_include \
+                    /packages/richtext-ckeditor4/lib/file-browser [subst {
+                        object_id "$object_id"
+                        type "$type"
+                        CKEditorFuncNum "$CKEditorFuncNum"
+                        CKEditor "$CKEditor"
+                        langCode "$langCode"
+        }]]
+    } else {
+        #
+        # Page contract failed
+        #
+        dict set d errMsg "invalid query parameter // $complaints"
+        set reply [subst {[dict get $d errMsg]}]
+    }
 
     ns_return 200 text/html $reply
 }
