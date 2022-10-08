@@ -23,7 +23,7 @@ namespace eval ::richtext::ckeditor4 {
     # The CKeditor 4 configuration can be tailored via the NaviServer
     # config file:
     #
-    # ns_section ns/server/${server}/acs/richtext-ckeditor
+    # ns_section ns/server/${server}/acs/richtext-ckeditor4
     #        ns_param CKEditorVersion   4.19.1
     #        ns_param CKEditorPackage   full
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
