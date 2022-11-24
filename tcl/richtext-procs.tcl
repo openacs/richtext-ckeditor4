@@ -258,7 +258,9 @@ namespace eval ::richtext::ckeditor4 {
             jsFiles  {} \
             extraFiles {} \
             downloadURLs http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${ck_package}.zip \
-            urnMap {}
+            urnMap {} \
+            versionCheckURL https://cdn.ckeditor.com/
+        
 
         return $result
     }
