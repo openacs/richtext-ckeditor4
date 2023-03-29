@@ -65,11 +65,10 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/uploadimage {
 
     if {[llength $complaints] == 0 && $type eq "Images"} {
 
-        set form [ns_getform]
         set d [::richtext::ckeditor4::ckfinder::file_attach \
                    -object_id   $object_id \
-                   -import_file [ns_set get $form upload.tmpfile] \
-                   -mime_type   [ns_set get $form upload.content-type] \
+                   -import_file [ns_queryget upload.tmpfile] \
+                   -mime_type   [ns_queryget upload.content-type] \
                    -user_id     [ad_conn user_id] \
                    -peeraddr    [ad_conn peeraddr] \
                    -package_id  [ad_conn package_id] \
@@ -135,11 +134,10 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/upload {
 
     if {[llength $complaints] == 0 && $type eq "Files"} {
 
-        set form [ns_getform]
         set d [::richtext::ckeditor4::ckfinder::file_attach \
                    -object_id   $object_id \
-                   -import_file [ns_set get $form upload.tmpfile] \
-                   -mime_type   [ns_set get $form upload.content-type] \
+                   -import_file [ns_queryget upload.tmpfile] \
+                   -mime_type   [ns_queryget upload.content-type] \
                    -user_id     [ad_conn user_id] \
                    -peeraddr    [ad_conn peeraddr] \
                    -package_id  [ad_conn package_id] \
