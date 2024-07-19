@@ -231,7 +231,7 @@ namespace eval ::richtext::ckeditor4 {
         #
         set resourceDir [acs_package_root_dir richtext-ckeditor4/www/resources]
         set resourceUrl /resources/richtext-ckeditor4
-        set cdn         //cdn.ckeditor.com/
+        set cdn         //cdn.ckeditor.com
 
         set suffix $version/$ck_package/ckeditor.js
         #ns_log notice "CKeditor4: check for locally installed file" \
