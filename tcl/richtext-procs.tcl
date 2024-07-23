@@ -97,6 +97,7 @@ namespace eval ::richtext::ckeditor4 {
         lappend ckOptionsList \
             "language: '[lang::conn::language]'" \
             "disableNativeSpellChecker: false" \
+            "versionCheck: false" \
             "scayt_autoStartup: [dict get $options spellcheck]"
 
         #
@@ -259,8 +260,13 @@ namespace eval ::richtext::ckeditor4 {
             extraFiles {} \
             downloadURLs http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${ck_package}.zip \
             urnMap {} \
-            versionCheckURL https://cdn.ckeditor.com/
-        
+            versionCheckURL https://cdn.ckeditor.com/ \
+            plugins {
+                a11yhelp about clipboard dialog image link magicline pastefromgdocs pastefromlibreoffice
+                pastefromword pastetools scayt specialchar table tableselection tabletools widget
+            } \
+            versionCheckAPI {cdn cdnjs library ckeditor count 20} \
+            installedVersion $version \
 
         return $result
     }
@@ -348,10 +354,48 @@ namespace eval ::richtext::ckeditor4 {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
 
-
         set resource_info [::richtext::ckeditor4::resource_info \
                                -ck_package $ck_package \
                                -version $version]
+
+        set downloadFromCDNnjs 0
+        if {$downloadFromCDNnjs} {
+            #
+            # If you really want to use this, you should also clear
+            # "downloadURLs" in resource_info to avoid the version
+            # check on the tar file in
+            # :util::resources::is_installed_locally. For this
+            # piecewise download the tar file does not exist.
+            #
+            set install_dir_name [acs_package_root_dir richtext-ckeditor4]/www/resources/$version/standard
+            set download_prefix https://cdnjs.cloudflare.com/ajax/libs/ckeditor/$version/
+            if {[info commands ::json::json2dict] eq ""} {
+                package require json
+            }
+            
+            file mkdir $install_dir_name
+            set r [ns_http run https://api.cdnjs.com/libraries/ckeditor/$version]
+            set d [::json::json2dict [dict get $r body]]
+            foreach fn [dict get $d files] {
+                if {[string match *.min.* $fn]} continue
+                if {[regexp {plugins/([^/]+)/} $fn . pluginName]} {
+                    if {$pluginName ni [dict get $resource_info plugins]} {
+                        continue
+                    }
+                }
+                set result [::util::resources::download_helper -url $download_prefix/$fn]
+                #ns_log notice "... returned status code [dict get $result status]"
+                set spool_fn [dict get $result file]
+
+                set subdir [ad_file dirname $install_dir_name/$fn]
+                if {![ad_file isdirectory $subdir]} {
+                    file mkdir $subdir
+                }
+                #ns_log notice "mv $spool_fn $install_dir_name/$fn"
+                file rename -force -- $spool_fn $install_dir_name/$fn
+            }
+            return
+        }
 
         ::util::resources::download \
             -resource_info $resource_info \
