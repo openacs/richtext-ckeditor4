@@ -369,13 +369,10 @@ namespace eval ::richtext::ckeditor4 {
             #
             set install_dir_name [acs_package_root_dir richtext-ckeditor4]/www/resources/$version/standard
             set download_prefix https://cdnjs.cloudflare.com/ajax/libs/ckeditor/$version/
-            if {[info commands ::json::json2dict] eq ""} {
-                package require json
-            }
             
             file mkdir $install_dir_name
             set r [ns_http run https://api.cdnjs.com/libraries/ckeditor/$version]
-            set d [::json::json2dict [dict get $r body]]
+            set d [::util::json2dict [dict get $r body]]
             foreach fn [dict get $d files] {
                 if {[string match *.min.* $fn]} continue
                 if {[regexp {plugins/([^/]+)/} $fn . pluginName]} {
