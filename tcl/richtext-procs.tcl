@@ -260,12 +260,12 @@ namespace eval ::richtext::ckeditor4 {
             extraFiles {} \
             downloadURLs http://download.cksource.com/CKEditor/CKEditor/CKEditor%20${version}/ckeditor_${version}_${ck_package}.zip \
             urnMap {} \
-            versionCheckURL https://cdn.ckeditor.com/ \
             plugins {
                 a11yhelp about clipboard dialog image link magicline pastefromgdocs pastefromlibreoffice
                 pastefromword pastetools scayt specialchar table tableselection tabletools widget
             } \
             versionCheckAPI {cdn cdnjs library ckeditor count 20} \
+            vulnerabilityCheck {service snyk library ckeditor4} \
             installedVersion $version \
 
         return $result
