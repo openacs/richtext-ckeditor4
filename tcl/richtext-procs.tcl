@@ -231,15 +231,11 @@ namespace eval ::richtext::ckeditor4 {
         # Setup variables for access via CDN vs. local resources.
         #
         set resourceDir [acs_package_root_dir richtext-ckeditor4/www/resources]
-        set resourceUrl /resources/richtext-ckeditor4
         set cdn         //cdn.ckeditor.com
 
         set suffix $version/$ck_package/ckeditor.js
-        #ns_log notice "CKeditor4: check for locally installed file" \
-            $resourceDir/$version/$ck_package -> \
-            [file exists $resourceDir/$version/$ck_package]
         if {[file exists $resourceDir/$version/$ck_package]} {
-            set prefix  $resourceUrl/$version
+            set prefix  /resources/richtext-ckeditor4/$version
             set cdnHost ""
         } else {
             set prefix $cdn/$version
