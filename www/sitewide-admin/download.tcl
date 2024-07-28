@@ -4,7 +4,7 @@ ad_page_contract {
     @creation-date Jan 04, 2017
 } {
     {ck_package:token,notnull ""}
-    {version:word,notnull ""}
+    {version:token,notnull ""}
 }
 
 ::richtext::ckeditor4::download -ck_package $ck_package -version $version

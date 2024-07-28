@@ -6,12 +6,12 @@ ad_page_contract {
     {ck_package:token ""}
 }
 
-set version $::richtext::ckeditor4::version
-set default_ck_package $::richtext::ckeditor4::ck_package
 if {$ck_package eq ""} {
     set ck_package $::richtext::ckeditor4::ck_package
 }
 set resource_info [::richtext::ckeditor4::resource_info -ck_package $ck_package]
+set version [dict get $resource_info installedVersion]
+
 set download_url [ad_conn url]/download?ck_package=$ck_package
 
 set title "[dict get $resource_info resourceName] - Sitewide Admin"

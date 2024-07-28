@@ -394,9 +394,7 @@ namespace eval ::richtext::ckeditor4 {
             return
         }
 
-        ::util::resources::download \
-            -resource_info $resource_info \
-            -version_dir $version
+        ::util::resources::download -resource_info $resource_info
 
         set resourceDir [dict get $resource_info resourceDir]
 
