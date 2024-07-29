@@ -262,7 +262,7 @@ namespace eval ::richtext::ckeditor4 {
             } \
             versionCheckAPI {cdn cdnjs library ckeditor count 20} \
             vulnerabilityCheck {service snyk library ckeditor4} \
-            installedVersion $version \
+            configuredVersion $version \
 
         return $result
     }
