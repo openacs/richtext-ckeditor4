@@ -16,9 +16,8 @@ ad_library {
 }
 
 namespace eval ::richtext::ckeditor4 {
-
-    set package_id [apm_package_id_from_key "richtext-ckeditor4"]
-
+    variable parameter_info
+    
     #
     # The CKeditor 4 configuration can be tailored via the NaviServer
     # config file:
@@ -29,11 +28,14 @@ namespace eval ::richtext::ckeditor4 {
     #        ns_param CKFinderURL       /acs-content-repository/ckfinder
     #        ns_param StandardPlugins   uploadimage
     #
-    set ::richtext::ckeditor4::version [parameter::get \
-                                            -package_id $package_id \
-                                            -parameter CKEditorVersion \
-                                            -default 4.22.1]
 
+    set parameter_info {
+        package_key richtext-ckeditor4
+        parameter_name CKEditorVersion
+        default_value 4.22.1
+    }
+    
+    set package_id [apm_package_id_from_key "richtext-ckeditor4"]
     set ::richtext::ckeditor4::ckfinder_url [parameter::get \
                                                  -package_id $package_id \
                                                  -parameter CKFinderURL \
@@ -216,13 +218,20 @@ namespace eval ::richtext::ckeditor4 {
         from the local filesystem, or from CDN.
 
     } {
+        variable parameter_info
         #
         # If no version or CKeditor package are specified, use the
         # namespaced variables as default.
         #
         if {$version eq ""} {
-            set version ${::richtext::ckeditor4::version}
+            dict with parameter_info {
+                set version [::parameter::get_global_value \
+                                 -package_key $package_key \
+                                 -parameter $parameter_name \
+                                 -default $default_value]
+            }
         }
+        
         if {$ck_package eq ""} {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
@@ -262,6 +271,7 @@ namespace eval ::richtext::ckeditor4 {
             } \
             versionCheckAPI {cdn cdnjs library ckeditor count 20} \
             vulnerabilityCheck {service snyk library ckeditor4} \
+            parameterInfo $parameter_info \
             configuredVersion $version \
 
         return $result
@@ -285,18 +295,15 @@ namespace eval ::richtext::ckeditor4 {
         customization.
 
     } {
-        if {$version eq ""} {
-            set version ${::richtext::ckeditor4::version}
-        }
         if {$ck_package eq ""} {
             set ck_package ${::richtext::ckeditor4::ck_package}
-        }
+        }        
         #ns_log notice "richtext::ckeditor4::add_editor -version $version -ck_package $ck_package"
-
+        
         set resource_info [::richtext::ckeditor4::resource_info \
                                -ck_package $ck_package \
                                -version $version]
-
+        set version [dict get $resource_info configuredVersion]
         set prefix [dict get $resource_info prefix]
         #ns_log notice "richtext::ckeditor4::add_editor loading from $prefix"
 
@@ -340,12 +347,9 @@ namespace eval ::richtext::ckeditor4 {
 
     } {
         #
-        # If no version or ck_package are specified, use the
-        # namespaced variables as default.
+        # If no ck_package is specified, use the namespaced variable
+        # as default.
         #
-        if {$version eq ""} {
-            set version ${::richtext::ckeditor4::version}
-        }
         if {$ck_package eq ""} {
             set ck_package ${::richtext::ckeditor4::ck_package}
         }
@@ -353,6 +357,7 @@ namespace eval ::richtext::ckeditor4 {
         set resource_info [::richtext::ckeditor4::resource_info \
                                -ck_package $ck_package \
                                -version $version]
+        set version [dict get $resource_info configuredVersion]
 
         set downloadFromCDNnjs 0
         if {$downloadFromCDNnjs} {
@@ -365,7 +370,7 @@ namespace eval ::richtext::ckeditor4 {
             #
             set install_dir_name [acs_package_root_dir richtext-ckeditor4]/www/resources/$version/standard
             set download_prefix https://cdnjs.cloudflare.com/ajax/libs/ckeditor/$version/
-            
+
             file mkdir $install_dir_name
             set r [ns_http run https://api.cdnjs.com/libraries/ckeditor/$version]
             set d [::util::json2dict [dict get $r body]]
