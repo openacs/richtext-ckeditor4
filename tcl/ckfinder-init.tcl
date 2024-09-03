@@ -21,7 +21,7 @@
 # permissions to the public.
 
 # This interface can be used obtaining a customized version of
-# CKEditor containing he "uploadimage" plugin. When this is installed,
+# CKEditor containing the "uploadimage" plugin. When this is installed,
 # it can be used e.g. with a widget spec like the following
 #
 #    {text:richtext(richtext)
@@ -65,11 +65,10 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/uploadimage {
 
     if {[llength $complaints] == 0 && $type eq "Images"} {
 
-        set form [ns_getform]
-        set d [::richtext::ckeditor4::ckfinder::image_attach \
+        set d [::richtext::ckeditor4::ckfinder::file_attach \
                    -object_id   $object_id \
-                   -import_file [ns_set get $form upload.tmpfile] \
-                   -mime_type   [ns_set get $form upload.content-type] \
+                   -import_file [ns_queryget upload.tmpfile] \
+                   -mime_type   [ns_queryget upload.content-type] \
                    -user_id     [ad_conn user_id] \
                    -peeraddr    [ad_conn peeraddr] \
                    -package_id  [ad_conn package_id] \
@@ -93,7 +92,7 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/uploadimage {
             }}]
         } else {
             #
-            # ckfinder::image_attach returned an error
+            # ckfinder::file_attach returned an error
             #
             set errMsg [dict get $d errMsg]
         }
@@ -135,11 +134,10 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/upload {
 
     if {[llength $complaints] == 0 && $type eq "Files"} {
 
-        set form [ns_getform]
         set d [::richtext::ckeditor4::ckfinder::file_attach \
                    -object_id   $object_id \
-                   -import_file [ns_set get $form upload.tmpfile] \
-                   -mime_type   [ns_set get $form upload.content-type] \
+                   -import_file [ns_queryget upload.tmpfile] \
+                   -mime_type   [ns_queryget upload.content-type] \
                    -user_id     [ad_conn user_id] \
                    -peeraddr    [ad_conn peeraddr] \
                    -package_id  [ad_conn package_id] \
@@ -160,7 +158,7 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/upload {
             }]
         } else {
             #
-            # ckfinder::image_attach returned an error
+            # ckfinder::file_attach returned an error
             #
             set errMsg [dict get $d errMsg]
         }
@@ -185,26 +183,34 @@ ns_register_proc GET $::richtext::ckeditor4::ckfinder_url/browse {
     # File-browser (for the standard "filebrowser" plugin)
     #
     set complaints [::richtext::ckeditor4::ckfinder::query_page_contract {
-        {object_id:naturalnum}
+        {object_id:object_id}
         {type:word}
         {CKEditorFuncNum ""}
         {CKEditor:word ""}
         {langCode en}
     }]
 
-    permission::require_permission \
-        -party_id [ad_conn user_id] \
-        -object_id $object_id \
-        -privilege read
+    if {[llength $complaints] == 0} {
+        permission::require_permission \
+            -party_id [ad_conn user_id] \
+            -object_id $object_id \
+            -privilege read
 
-    set reply [template::adp_include \
-                   /packages/richtext-ckeditor4/lib/file-browser [subst {
-                       object_id "$object_id"
-                       type "$type"
-                       CKEditorFuncNum "$CKEditorFuncNum"
-                       CKEditor "$CKEditor"
-                       langCode "$langCode"
-    }]]
+        set reply [template::adp_include \
+                    /packages/richtext-ckeditor4/lib/file-browser [subst {
+                        object_id "$object_id"
+                        type "$type"
+                        CKEditorFuncNum "$CKEditorFuncNum"
+                        CKEditor "$CKEditor"
+                        langCode "$langCode"
+        }]]
+    } else {
+        #
+        # Page contract failed
+        #
+        dict set d errMsg "invalid query parameter // $complaints"
+        set reply [subst {[dict get $d errMsg]}]
+    }
 
     ns_return 200 text/html $reply
 }
@@ -216,7 +222,7 @@ if {$::tcl_version eq "8.5"} {
     #
     # In Tcl 8.5, "::try" was not yet a built-in of Tcl
     #
-    package require try 
+    package require try
 }
 
 ns_register_proc GET $::richtext::ckeditor4::ckfinder_url/view {

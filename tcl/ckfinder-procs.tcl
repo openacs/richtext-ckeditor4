@@ -4,7 +4,7 @@ ad_library {
 
     This script defines the following public procs:
 
-       ::richtext::ckeditor4::ckfinder::image_attach
+       ::richtext::ckeditor4::ckfinder::file_attach
        ::richtext::ckeditor4::ckfinder::return_file
 
     @author Gustaf Neumann
@@ -12,11 +12,11 @@ ad_library {
     @cvs-id $Id$
 
     NOTE: the delivery of files performs two permission checks, once
-    in the requestprocessor (the site nodes) and once for the concrete image.
-    If one whishes to make uploaded images readable by "The Public", make
+    in the requestprocessor (the site nodes) and once for the concrete file.
+    If one whishes to make uploaded files readable by "The Public", make
     sure that the /
 
-} 
+}
 
 namespace eval ::richtext::ckeditor4::ckfinder {
 
@@ -31,9 +31,9 @@ namespace eval ::richtext::ckeditor4::ckfinder {
         {-image:boolean}
     } {
 
-        Insert the provided image file to the content repository as a
-        new item and attach the image to the specified object_id via
-        the attachment API. This makes sure that the image will be
+        Insert the provided file to the content repository as a
+        new item and attach it to the specified object_id via
+        the attachment API. This makes sure that the file will be
         deleted from the content repository, when the provided
         object_id is deleted.
 
@@ -63,7 +63,7 @@ namespace eval ::richtext::ckeditor4::ckfinder {
                     set success 1
                 }
                 default {
-                    ns_log warning "image_attach: can't handle image type '$mime_type'"
+                    ns_log warning "file_attach: can't handle image type '$mime_type'"
                     return [list \
                                 success 0 \
                                 errMsg "can't handle image type '$mime_type'"]
@@ -78,7 +78,7 @@ namespace eval ::richtext::ckeditor4::ckfinder {
         # Create a new item without child_rels
         #
         set name $object_id-[clock clicks -microseconds]
-        set item_id [::xo::db::sql::content_item new \
+        set item_id [::acs::dc call content_item new \
                          -name            $name \
                          -parent_id       [require_root_folder] \
                          -context_id      $object_id \
@@ -106,7 +106,7 @@ namespace eval ::richtext::ckeditor4::ckfinder {
             -mime_type       $mime_type
 
         #
-        # Attach the image to the object via the attachments API
+        # Attach the file to the object via the attachments API
         #
         attachments::attach \
             -object_id $object_id \
@@ -127,8 +127,8 @@ namespace eval ::richtext::ckeditor4::ckfinder {
     } {
 
         Return the file with the specified revision_id to the
-        user. The user must have at read permissions to obtain the
-        file (image).
+        user. The user must have at least "read" permissions to
+        obtain the file.
 
     } {
         permission::require_permission \
@@ -179,9 +179,8 @@ namespace eval ::richtext::ckeditor4::ckfinder {
         #
         # Process params provided by the query
         #
-        foreach p [split [ns_conn query] &] {
-            lassign [split $p =] var value
-            set param($var) $value
+        foreach {key value} [ns_set array [ns_parsequery [ns_conn query]]] {
+            set param($key) $value
         }
         #ns_log notice "provided params [array get param]"
         #

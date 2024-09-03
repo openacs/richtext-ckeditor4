@@ -1,6 +1,6 @@
 ad_include_contract {
 } {
-    {object_id:naturalnum}
+    {object_id:object_id}
     {type:word}
     {CKEditorFuncNum ""}
     {CKEditor:word ""}
