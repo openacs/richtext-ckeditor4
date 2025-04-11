@@ -151,11 +151,17 @@ ns_register_proc POST $::richtext::ckeditor4::ckfinder_url/upload {
                               -base $::richtext::ckeditor4::ckfinder_url/view {
                                   {image_id "[dict get $d file_id]"}
                               }]
-            set reply [subst {
-                <script type="text/javascript">
-                window.parent.CKEDITOR.tools.callFunction("$CKEditorFuncNum", "$view_url", "");
-                </script>
-            }]
+            #set reply [subst {
+            #    <script type="text/javascript">
+            #    window.parent.CKEDITOR.tools.callFunction("$CKEditorFuncNum", "$view_url", "");
+            #    </script>
+            #}]
+
+            set reply [subst {{
+                "uploaded":  [dict get $d success],
+                "fileName": "[dict get $d name]",
+                "url":      "$view_url"
+            }}]
         } else {
             #
             # ckfinder::file_attach returned an error
